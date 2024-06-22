@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Indian Stock Market Indices</title>
+    <style>
+        table { border-collapse: collapse; width: 100%; }
+        th, td { border: 1px solid black; padding: 8px; text-align: left; }
+        th { background-color: #f2f2f2; }
+    </style>
+</head>
+<body>
+    <h1>Indian Stock Market Indices</h1>
+    <table id="indexTable">
+        <tr>
+            <th>Index</th>
+            <th>Change</th>
+            <th>Direction</th>
+        </tr>
+    </table>
+
+    <script>
+        const indianIndices = [
+            { symbol: "%5ENSEI", name: "Nifty 50" },
+            { symbol: "%5EBSESN", name: "BSE SENSEX" },
+            { symbol: "%5ENSEBANK", name: "Nifty Bank" },
+            { symbol: "%5ECNXIT", name: "Nifty IT" }
+        ];
+
+        function fetchIndexData(symbol) {
+            return fetch(`https://query1.finance.yahoo.com/v8/finance/chart/${symbol}`)
+                .then(response => response.json())
+                .then(data => {
+                    const quote = data.chart.result[0].meta;
+                    const change = quote.regularMarketPrice - quote.chartPreviousClose;
+                    return {
+                        change: change.toFixed(2),
+                        direction: change > 0 ? 'Up' : 'Down'
+                    };
+                });
+        }
+
+        function updateTable(index, data) {
+            const table = document.getElementById('indexTable');
+            const row = table.insertRow(-1);
+            row.insertCell(0).textContent = index.name;
+            row.insertCell(1).textContent = data.change;
+            row.insertCell(2).textContent = data.direction;
+        }
+
+        async function fetchAllIndices() {
+            for (const index of indianIndices) {
+                try {
+                    const data = await fetchIndexData(index.symbol);
+                    updateTable(index, data);
+                } catch (error) {
+                    console.error(`Error fetching data for ${index.name}:`, error);
+                }
+            }
+        }
+
+        fetchAllIndices();
+    </script>
+</body>
+</html>
