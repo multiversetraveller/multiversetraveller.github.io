@@ -16,9 +16,9 @@
         <table class="w-full bg-white shadow-md rounded-lg overflow-hidden">
             <thead class="bg-blue-500 text-white">
                 <tr>
-                    <th class="py-2 px-4">Index</th>
-                    <th class="py-2 px-4">Change</th>
-                    <th class="py-2 px-4">Direction</th>
+                    <th class="py-2 px-4 text-center">Index</th>
+                    <th class="py-2 px-4 text-center">Change</th>
+                    <th class="py-2 px-4 text-center">Direction</th>
                 </tr>
             </thead>
             <tbody id="indexTable">
@@ -56,9 +56,9 @@
                     const data = await fetchIndexData(index.symbol);
                     const row = document.createElement('tr');
                     row.innerHTML = `
-                        <td class="py-2 px-4">${index.name}</td>
-                        <td class="py-2 px-4">${data.change}</td>
-                        <td class="py-2 px-4">${data.direction}</td>
+                        <td class="py-2 px-4 text-center">${index.name}</td>
+                        <td class="py-2 px-4 text-center">${data.change}</td>
+                        <td class="py-2 px-4 text-center">${data.direction}</td>
                     `;
                     tableBody.appendChild(row);
                 } catch (error) {
