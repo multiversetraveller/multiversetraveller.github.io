@@ -12,9 +12,8 @@ document.addEventListener("DOMContentLoaded", () => {
             const data = await response.json();
             const result = data.chart.result[0];
             const meta = result.meta;
-            const timestamps = result.timestamp;
+            const timestamps = result.timestamp.map(t => new Date(t * 1000).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }));
             const prices = result.indicators.quote[0].close;
-
             const change = (meta.regularMarketPrice - meta.chartPreviousClose).toFixed(2);
             const direction = change > 0 ? "Up" : "Down";
             return { change, direction, timestamps, prices };
@@ -32,11 +31,13 @@ document.addEventListener("DOMContentLoaded", () => {
             try {
                 const data = await fetchIndexData(index.symbol);
                 const row = document.getElementById(`row-${index.symbol}`);
-                row.querySelector('.change').innerText = data.change;
-                row.querySelector('.direction').innerText = data.direction;
-                row.querySelector('.direction').classList.toggle('text-green-600', data.direction === 'Up');
-                row.querySelector('.direction').classList.toggle('text-red-600', data.direction === 'Down');
-                
+                if (row) {
+                    row.querySelector('.change').innerText = data.change;
+                    row.querySelector('.direction').innerText = data.direction;
+                    row.querySelector('.direction').classList.toggle('text-green-600', data.direction === 'Up');
+                    row.querySelector('.direction').classList.toggle('text-red-600', data.direction === 'Down');
+                }
+
                 chartLabels.push(index.name);
                 chartDatasets.push({
                     label: index.name,
@@ -45,45 +46,12 @@ document.addEventListener("DOMContentLoaded", () => {
                     borderColor: getRandomColor(),
                     tension: 0.1
                 });
+
+                // Update the chart's dataset
+                updateChart(index.symbol, data.timestamps, data.prices);
             } catch (error) {
                 console.error(`Error updating table for ${index.name}:`, error);
             }
-        }
-
-        // Update the chart
-        updateChart(chartDatasets);
-    }
-
-    function updateChart(datasets) {
-        const ctx = document.getElementById('indexChart').getContext('2d');
-        if (window.myChart) {
-            window.myChart.data.datasets = datasets;
-            window.myChart.update();
-        } else {
-            window.myChart = new Chart(ctx, {
-                type: 'line',
-                data: {
-                    labels: Array.from({ length: datasets[0].data.length }, (_, i) => i + 1),
-                    datasets: datasets
-                },
-                options: {
-                    scales: {
-                        x: {
-                            title: {
-                                display: true,
-                                text: 'Time (2-min intervals)'
-                            }
-                        },
-                        y: {
-                            title: {
-                                display: true,
-                                text: 'Price'
-                            },
-                            beginAtZero: false
-                        }
-                    }
-                }
-            });
         }
     }
 
@@ -101,6 +69,15 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     }
 
+    function updateChart(symbol, labels, data) {
+        const dataset = window.myChart.data.datasets.find(ds => ds.label === symbol);
+        if (dataset) {
+            dataset.data = data;
+            window.myChart.data.labels = labels;
+            window.myChart.update();
+        }
+    }
+
     function getRandomColor() {
         const letters = '0123456789ABCDEF';
         let color = '#';
@@ -110,9 +87,48 @@ document.addEventListener("DOMContentLoaded", () => {
         return color;
     }
 
+    function initializeChart() {
+        const ctx = document.getElementById('indexChart').getContext('2d');
+        window.myChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: [],
+                datasets: []
+            },
+            options: {
+                animation: {
+                    duration: 1000,
+                    easing: 'easeInOutQuart',
+                    onProgress: function(animation) {
+                        console.log(`Animation progress: ${animation.currentStep / animation.numSteps}`);
+                    },
+                    onComplete: function(animation) {
+                        console.log('Animation completed');
+                    }
+                },
+                scales: {
+                    x: {
+                        title: {
+                            display: true,
+                            text: 'Time (2-min intervals)'
+                        }
+                    },
+                    y: {
+                        title: {
+                            display: true,
+                            text: 'Price'
+                        },
+                        beginAtZero: false
+                    }
+                }
+            }
+        });
+    }
+
     // Initial setup
     createTableRows();
+    initializeChart();
     updateTableAndChart();
     // Update every 2 seconds
-    setInterval(updateTableAndChart, 2000);
+    setInterval(updateTableAndChart, 3000);
 });
