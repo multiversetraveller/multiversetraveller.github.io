@@ -1,4 +1,4 @@
-        const indices = [
+ const indices = [
             { symbol: "%5ENSEI", name: "Nifty 50" },
             { symbol: "%5EBSESN", name: "BSE SENSEX" },
             { symbol: "%5ENSEBANK", name: "Nifty Bank" },
@@ -20,21 +20,18 @@
         }
 
         async function updateTableAndChart() {
-            const tableBody = document.getElementById("indexTable");
-            tableBody.innerHTML = "";  // Clear the table
             const chartLabels = [];
             const chartData = [];
 
             for (const index of indices) {
                 try {
                     const data = await fetchIndexData(index.symbol);
-                    const row = document.createElement("tr");
-                    row.innerHTML = `
-                        <td class="py-2 px-4 text-center">${index.name}</td>
-                        <td class="py-2 px-4 text-center">${data.change}</td>
-                        <td class="py-2 px-4 text-center ${data.direction === "Up" ? "text-green-600" : "text-red-600"}">${data.direction}</td>
-                    `;
-                    tableBody.appendChild(row);
+                    const row = document.getElementById(`row-${index.symbol}`);
+                    row.querySelector('.change').innerText = data.change;
+                    row.querySelector('.direction').innerText = data.direction;
+                    row.querySelector('.direction').classList.toggle('text-green-600', data.direction === 'Up');
+                    row.querySelector('.direction').classList.toggle('text-red-600', data.direction === 'Down');
+                    
                     chartLabels.push(index.name);
                     chartData.push(parseFloat(data.change));
                 } catch (error) {
@@ -76,7 +73,22 @@
             }
         }
 
-        // Initial update
+        function createTableRows() {
+            const tableBody = document.getElementById("indexTable");
+            for (const index of indices) {
+                const row = document.createElement("tr");
+                row.id = `row-${index.symbol}`;
+                row.innerHTML = `
+                    <td class="py-2 px-4 text-center">${index.name}</td>
+                    <td class="py-2 px-4 text-center change"></td>
+                    <td class="py-2 px-4 text-center direction"></td>
+                `;
+                tableBody.appendChild(row);
+            }
+        }
+
+        // Initial setup
+        createTableRows();
         updateTableAndChart();
         // Update every 2 seconds
         setInterval(updateTableAndChart, 2000);
