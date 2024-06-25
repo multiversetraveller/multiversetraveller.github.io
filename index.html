@@ -6,7 +6,6 @@
     <title>Indian Stock Market Indices</title>
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="./script.js"></script>
 </head>
 <body class="bg-gray-100 text-gray-900 font-sans">
     <div class="bg-blue-500 py-4 mb-4">
@@ -21,12 +20,13 @@
                     <th class="py-2 px-4 text-center">Direction</th>
                 </tr>
             </thead>
-            <tbody id="indexTable"></tbody>
+            <tbody id="indexTable">
+                <!-- Rows will be inserted here dynamically -->
+            </tbody>
         </table>
         <div class="mt-8">
             <canvas id="indexChart"></canvas>
         </div>
     </div>
-   
 </body>
 </html>
