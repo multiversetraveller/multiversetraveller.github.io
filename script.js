@@ -91,4 +91,4 @@
         createTableRows();
         updateTableAndChart();
         // Update every 2 seconds
-        setInterval(updateTableAndChart, 2000);
+        setInterval(updateTableAndChart, 3000);
